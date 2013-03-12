@@ -11,9 +11,15 @@ Still, devs will be devs, and OAuth is not going anywhere, so here we are:
 
 Currently, I only have Twitter done. Basically, each new service that this
 needs to suppose will require a new phantomjs module and some special urls
-in the `OAuthProvider` class in `auth.py`. Not sure how best to manage that 
+in the `OAuthProvider` class in `auth.py`. Not sure how best to manage that
 modularity at the moment, but for now, since Twitter is all *I* need, a flat
 file structure suffices.
+
+## Running the auth.js script:
+
+    node auth.js \
+      --key xkNtpnwJdmbSE6uDH0vsF --secret hqgCs6kzXfaHT5pS8GdyEo93V04QMUI7u2JtxcZKB1N \
+      --user thisisnotme --password r5Q4cERliu
 
 # License
 

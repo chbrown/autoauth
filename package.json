@@ -1,0 +1,12 @@
+{
+  "name": "autoauth",
+  "description": "OAuth credential helper.",
+  "version": "0.0.2",
+  "main": "auth.js",
+  "author": {"name": "Christopher Brown", "email": "io@henrian.com"},
+  "dependencies": {
+    "optimist": "*",
+    "winston": "*",
+    "oauth": "*"
+  }
+}
