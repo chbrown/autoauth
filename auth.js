@@ -2,12 +2,6 @@
 var winston = require('winston');
 var oauth = require('oauth');
 var child_process = require('child_process');
-var argv = require('optimist')
-  .default({provider: 'twitter'})
-  .usage('Convert login creds to oAuth creds!\n' +
-    'Usage: $0 --key CONSUMER_KEY --secret CONSUMER_SECRET --user SERVICE_USERNAME --password SERVICE_PASSWORD')
-  .demand(['key', 'secret', 'user', 'password'])
-  .argv;
 
 var logger = new winston.Logger({
   transports: [new winston.transports.Console({handleExceptions: true})]
@@ -22,7 +16,7 @@ var oauth_providers = {
       if (err) callback(err);
       var login_url = 'https://twitter.com/oauth/authorize?oauth_token=' + oauth_request_token;
       var phantom_args = ['twitter.js', login_url, username, password];
-      var phantom_opts = {};
+      var phantom_opts = {cwd: __dirname, timeout: 15*1000}; // 15sec timeout
       logger.info('$ phantomjs ' + phantom_args.join(' '));
       child_process.execFile('phantomjs', phantom_args, phantom_opts, function(err, verifier, stderr) {
         if (stderr) console.error('phantomjs stderr: ' + stderr);
@@ -37,6 +31,13 @@ var oauth_providers = {
 };
 
 if (require.main === module) {
+  var argv = require('optimist')
+    .default({provider: 'twitter'})
+    .usage('Convert login creds to oAuth creds!\n' +
+      'Usage: $0 --key CONSUMER_KEY --secret CONSUMER_SECRET --user SERVICE_USERNAME --password SERVICE_PASSWORD')
+    .demand(['key', 'secret', 'user', 'password'])
+    .argv;
+
   var provider = oauth_providers[argv.provider];
   provider(argv.key, argv.secret, argv.user, argv.password, function(err, access_token, access_token_secret) {
     if (err) console.error(err);
