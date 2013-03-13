@@ -4,7 +4,7 @@ var oauth = require('oauth');
 var child_process = require('child_process');
 
 var logger = new winston.Logger({
-  transports: [new winston.transports.Console({handleExceptions: true})]
+  transports: [new winston.transports.Console()]
 });
 
 var oauth_providers = {
