@@ -15,11 +15,48 @@ in the `OAuthProvider` class in `auth.py`. Not sure how best to manage that
 modularity at the moment, but for now, since Twitter is all *I* need, a flat
 file structure suffices.
 
+## Prerequisites:
+
+1. PhantomJS!
+
+    brew install phantomjs
+
+2. `oauth` and `optimist` and `winston`
+
+   npm install
+
+## Getting cred:
+
+1. Go to https://dev.twitter.com/apps/new
+2. Fill it out
+3. On your app page there'll be a "Consumer key" and a "Consumer secret" -- copy these down for later:
+
+    # assuming you're in bash:
+    export CONSUMER_KEY=xkNtpnwJdmbSE6uDH0vsF
+    export CONSUMER_SECRET=hqgCs6kzXfaHT5pS8GdyEo93V04QMUI7u2JtxcZKB1N
+
+Your personal Twitter account will have a pre-formed access token and secret at the bottom of the page, but I take it your going to be authenticating multiple accounts, so you don't need those now.
+
 ## Running the auth.js script:
 
+Now, with those `bash` environment variables set, run the `auth.js` script, replacing your username and password with actual values:
+
     node auth.js \
-      --key xkNtpnwJdmbSE6uDH0vsF --secret hqgCs6kzXfaHT5pS8GdyEo93V04QMUI7u2JtxcZKB1N \
+      --key $CONSUMER_KEY --secret $CONSUMER_SECRET \
       --user thisisnotme --password r5Q4cERliu
+
+This is just the command line interface. You can also use the Node.js lib as a module!
+
+    var autoauth = require('autoauth');
+    var key = process.env.CONSUMER_KEY, secret = process.env.CONSUMER_SECRET;
+    var user = 'thisisnotme', password = 'r5Q4cERliu';
+    autoauth.twitter(key, secret, user, password,
+      function(err, access_token, access_token_secret) {
+      if (err)
+        console.log("WTF!", err);
+      else
+        console.log("Got the user's credentials!", access_token, access_token_secret);
+    });
 
 # License
 
