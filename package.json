@@ -1,9 +1,23 @@
 {
   "name": "autoauth",
-  "description": "OAuth credential helper.",
   "version": "0.0.3",
+  "description": "OAuth credential helper.",
+  "keywords": ["oauth", "luddite", "automatic", "phantomjs"],
+  "homepage": "http://github.com/chbrown/autoauth",
+  "bugs": {
+    "url": "http://github.com/chbrown/autoauth/issues",
+    "email": "Christopher Brown <io@henrian.com>"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/chbrown/autoauth.git"
+  },
+  "author": {
+    "name": "Christopher Brown",
+    "email": "io@henrian.com",
+    "url": "http://henrian.com"
+  },
   "main": "auth.js",
-  "author": {"name": "Christopher Brown", "email": "io@henrian.com"},
   "dependencies": {
     "optimist": "*",
     "winston": "*",
