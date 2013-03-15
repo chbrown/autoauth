@@ -1,6 +1,6 @@
 {
   "name": "autoauth",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "OAuth credential helper.",
   "keywords": ["oauth", "luddite", "automatic", "phantomjs"],
   "homepage": "http://github.com/chbrown/autoauth",
