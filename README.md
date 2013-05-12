@@ -16,7 +16,7 @@ The goal is full read & write access, as close to full user account credentials 
 In general, the process works like this:
 
 1. You create an "App" on the endpoint, i.e., Twitter. This is done on via the endpoint's website. This App usually comes with an App Key and an App Secret. Most likely, it will only ever have one user: your personal account.
-2. You then add your user to this App via AutoAuth. This will result in another pair of credentials, an OAuth Access Token and OAuth Access Token Secret.
+2. You then add your user to this App via `AutoAuth`. This will result in another pair of credentials, an OAuth Access Token and OAuth Access Token Secret.
 3. You can now use these credentials to access the target service and manipulate your account as desired, using whatever client API library you like.
 
 To recap, the goal is (usually) to end up with four credentials:
@@ -59,7 +59,7 @@ Your personal Twitter account will have a pre-formed access token and secret at 
 4. The next page should show you a "Key" like `52a351d5ca79a57d26d3ace89d2a8e1d` and a "Secret" like `cd68f50112d1cb57`. These are important! Keep them handy. They are your "App Key" and "App Secret."
 5. "Edit the authentication flow" for this app, and set the callback url to some random URL that won't redirect. I use `http://henrian.com/`, for example.
 
-Then simply run autoauth with the App Key and App Secret values as `--appkey` and `--secret` arguments, `--username` and `--password` with your account credentials.
+Then simply run `auth.js` with the App Key and App Secret values as `--appkey` and `--secret` arguments, `--username` and `--password` with your account credentials.
 
 *Disclaimer:* Yahoo! is requiring a captcha from me, just to log in, so this isn't currently working as it ought to.
 For the time being, simply run the script, use the url it generates (put it in the browser and follow the instructions, then copy the verifier bit in the querystring. Re-run `auth.js` with `--reqtoken` and `--reqsecret` set to the output from the previous run of `auth.js`, and `--verifier` to that bit from the URL.
