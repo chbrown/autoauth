@@ -15,7 +15,7 @@ The goal is full read & write access, as close to full user account credentials 
 
 In general, the process works like this:
 
-1. You create an "App" on the endpoint, i.e., Twitter. This is done on via the endpoint's website. This App usually comes with an App Key and an App Secret. Most likely, it will only ever have one user: your personal account.
+1. You create an "App" on the endpoint, i.e., Twitter. This is done on the endpoint's website. This App usually comes with an App Key and an App Secret. Most likely, it will only ever have one user: your personal account.
 2. You then add your user to this App via `AutoAuth`. This will result in another pair of credentials, an OAuth Access Token and OAuth Access Token Secret.
 3. You can now use these credentials to access the target service and manipulate your account as desired, using whatever client API library you like.
 
@@ -47,9 +47,9 @@ npm install
 
 1. Go to https://dev.twitter.com/apps/new
 2. Fill it out
-3. On your app page there'll be a "Consumer key" and a "Consumer secret" -- copy these down for later.
+3. On your app page there'll be a "Consumer key" and a "Consumer secret" -- copy these down for later. These are the App Key and App Secret, but Twitter just gives them fancy names.
 
-Your personal Twitter account will have a pre-formed access token and secret at the bottom of the page, but I take it you're going to be authenticating multiple accounts programmatically. Otherwise, those should work just fine.
+Your personal Twitter account will have a pre-formed access token and secret at the bottom of the page, but I take it you're going to be authenticating multiple accounts programmatically. Otherwise, those should work just fine (and you don't need this `AutoAuth` script at all).
 
 # Flickr
 
@@ -59,7 +59,7 @@ Your personal Twitter account will have a pre-formed access token and secret at 
 4. The next page should show you a "Key" like `52a351d5ca79a57d26d3ace89d2a8e1d` and a "Secret" like `cd68f50112d1cb57`. These are important! Keep them handy. They are your "App Key" and "App Secret."
 5. "Edit the authentication flow" for this app, and set the callback url to some random URL that won't redirect. I use `http://henrian.com/`, for example.
 
-Then simply run `auth.js` with the App Key and App Secret values as `--appkey` and `--secret` arguments, `--username` and `--password` with your account credentials.
+Then simply run `auth.js` with the App Key and App Secret values as `--appkey` and `--secret` arguments, `--username` and `--password` with your account credentials. And, of course, `--provider flickr`.
 
 *Disclaimer:* Yahoo! is requiring a captcha from me, just to log in, so this isn't currently working as it ought to.
 For the time being, simply run the script, use the url it generates (put it in the browser and follow the instructions, then copy the verifier bit in the querystring. Re-run `auth.js` with `--reqtoken` and `--reqsecret` set to the output from the previous run of `auth.js`, and `--verifier` to that bit from the URL.
@@ -76,7 +76,7 @@ additions to the clients hash in `auth.js`.
 You'll run the `auth.js` script, replacing your username and password with actual values:
 
 ````bash
-node auth.js \
+node auth.js --provider twitter \
   --appkey xkNtpnwJdmbSE6uDH0vsF --appsecret hqgCs6kzXfaHT5pS8GdyEo93V04QMUI7u2JtxcZKB1N \
   --user thisisnotme --password r5Q4cERliu
 ````
