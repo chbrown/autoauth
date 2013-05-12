@@ -1,4 +1,5 @@
 #!/usr/bin/env phantomjs
+'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
 var system = require('system');
 var webpage = require('webpage');
 var url = system.args[1];
@@ -17,10 +18,8 @@ page.onLoadFinished = function(status) {
       EXPECT = 'done';
 
       page.evaluate(function(opts) {
-        $('input[name="session[username_or_email]"]:visible:first')
-          .val(opts.screenname).trigger('keydown');
-        var $pw = $('input[name="session[password]"]:visible:first')
-          .val(opts.password).trigger('keydown');
+        $('input[name="session[username_or_email]"]:visible:first').val(opts.screenname).trigger('keydown');
+        var $pw = $('input[name="session[password]"]:visible:first').val(opts.password).trigger('keydown');
         var $form = $pw.closest('form:visible').trigger('keydown');
         setTimeout(function() {
           $form.trigger('submit');

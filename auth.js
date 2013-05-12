@@ -1,55 +1,96 @@
 #!/usr/bin/env node
+'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
 var winston = require('winston');
+var path = require('path');
+var util = require('util');
 var oauth = require('oauth');
 var child_process = require('child_process');
 
-var oauth_providers = {
-  twitter: function(key, secret, username, password, callback) {
-    // callback signature (err, access_token, access_secret)
-    var client = new oauth.OAuth('https://twitter.com/oauth/request_token', 'https://twitter.com/oauth/access_token',
-      key, secret, '1.0A', null, 'HMAC-SHA1');
-    client.getOAuthRequestToken(function(err, oauth_request_token, oauth_request_token_secret, result) {
-      if (err) callback(err);
-      var login_url = 'https://twitter.com/oauth/authorize?oauth_token=' + oauth_request_token;
-      var phantom_args = ['twitter.js', login_url, username, password];
-      var phantom_opts = {cwd: __dirname, timeout: 15*1000}; // 15sec timeout
-      winston.info('$ phantomjs ' + phantom_args.join(' '));
-      child_process.execFile('phantomjs', phantom_args, phantom_opts, function(err, verifier, stderr) {
-        if (stderr) winston.error('phantomjs stderr: ' + stderr);
-        if (err) {
-          // die fast
-          callback(err);
-        }
-        else {
-          var pin = verifier.trim();
-          winston.info('Got pin: ' + pin);
-          client.getOAuthAccessToken(oauth_request_token, oauth_request_token_secret, pin, function(err, oauth_access_token, oauth_access_token_secret, result) {
-            callback(err, oauth_access_token, oauth_access_token_secret);
-          });
-        }
-      });
+var verifiers_path = path.join(__dirname, 'verifiers');
+function verify(verifier_js, url, username, password, callback) {
+  // callback signature (err, request_token, request_token_secret, verifier)
+  var phantom_args = [verifier_js, url, username, password];
+  var phantom_opts = {cwd: verifiers_path, timeout: 15*1000}; // 15sec timeout
+  winston.info('$ cd ' + verifiers_path);
+  winston.info('$ phantomjs ' + phantom_args.join(' '));
+  child_process.execFile('phantomjs', phantom_args, phantom_opts, function(err, stdout, stderr) {
+    if (stderr) winston.error('phantomjs stderr: ' + stderr);
+    if (err) return callback(err);
+    callback(null, stdout.trim());
+  });
+}
+
+function Client(request_token_url, access_token_url, login_url, verifier_js, key, secret) {
+  this.OAuth = new oauth.OAuth(request_token_url, access_token_url, key, secret, '1.0A', null, 'HMAC-SHA1');
+  this.login_url = login_url;
+  this.verifier_js = verifier_js;
+}
+Client.prototype.getAccessToken = function(request_token, request_token_secret, verifier, callback) {
+  this.OAuth.getOAuthAccessToken(request_token, request_token_secret, verifier, function(err, access_token, access_token_secret) {
+    if (callback) {
+      callback(err, {access_token: access_token, access_token_secret: access_token_secret});
+    }
+    else {
+      if (err) {
+        winston.error("Auto OAuth authentication process failed");
+        winston.error(util.inspect(err, {showHidden: true, depth: 7}));
+      }
+      else {
+        winston.info('access_token=' + access_token + ',access_token_secret=' + access_token_secret);
+      }
+    }
+  });
+};
+Client.prototype.fullLogin = function(username, password, callback) {
+  var self = this;
+  this.OAuth.getOAuthRequestToken(function(err, oauth_request_token, oauth_request_token_secret) {
+    winston.info('request_token=' + oauth_request_token + ',request_token_secret=' + oauth_request_token_secret);
+    var url = self.login_url + oauth_request_token;
+    // oauth_request_token, oauth_request_token_secret,
+    verify(self.verifier_js, url, username, password, function(err, verifier) {
+      if (callback && err)
+        return callback(err);
+      if (!callback)
+        winston.info('Got verifier: ' + verifier);
+      self.getAccessToken(oauth_request_token, oauth_request_token_secret, verifier, callback);
     });
-  }
+  });
+};
+
+var clients = {
+  twitter: function(key, secret) {
+    return new Client('https://twitter.com/oauth/request_token',
+      'https://twitter.com/oauth/access_token',
+      'https://twitter.com/oauth/authorize?oauth_token=',
+      'twitter.js', key, secret);
+  },
+  flickr: function(key, secret) {
+    return new Client('http://www.flickr.com/services/oauth/request_token',
+      'http://www.flickr.com/services/oauth/access_token',
+      // We could probably have perms=write below, just as well, but "delete" is a fuller permission set.
+      'http://www.flickr.com/services/oauth/authorize?perms=delete&oauth_token=',
+      'flickr.js', key, secret);
+  },
 };
 
 if (require.main === module) {
   var argv = require('optimist')
-    .default({provider: 'twitter'})
-    .usage('Convert login creds to oAuth creds!\n' +
-      'Usage: $0 --key CONSUMER_KEY --secret CONSUMER_SECRET --user SERVICE_USERNAME --password SERVICE_PASSWORD')
-    .demand(['key', 'secret', 'user', 'password'])
+    .usage('Convert login creds to OAuth creds!\n' +
+      'Usage: $0 --appkey APP_KEY --appsecret APP_SECRET \\\n' +
+      '  --username USERNAME --password PASSWORD\n' +
+      'Or: $0 --appkey APP_KEY --appsecret APP_SECRET \\\n' +
+      '  --reqtoken OAUTH_REQUEST_TOKEN --reqsecret OAUTH_REQUEST_TOKEN_SECRET --verifier PIN')
+    .demand(['appkey', 'appsecret', 'provider'])
     .argv;
 
-  var provider = oauth_providers[argv.provider];
-  provider(argv.key, argv.secret, argv.user, argv.password, function(err, access_token, access_token_secret) {
-    if (err) {
-      winston.error("Auto oAuth authentication process failed");
-      winston.error(err);
-    }
-    else {
-      winston.info('access_token=' + access_token + ',access_secret=' + access_token_secret);
-    }
-  });
+  var client = clients[argv.provider](argv.appkey, argv.appsecret);
+  if (argv.verifier) {
+    // request_token, request_token_secret, and verifier are supplied
+    client.getAccessToken(argv.reqtoken, argv.reqsecret, argv.verifier);
+  }
+  else {
+    client.fullLogin(argv.username, argv.password);
+  }
 }
 
-module.exports = oauth_providers;
+module.exports = clients;
