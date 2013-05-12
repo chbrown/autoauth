@@ -62,14 +62,14 @@ Your personal Twitter account will have a pre-formed access token and secret at 
 Then simply run autoauth with the App Key and App Secret values as `--appkey` and `--secret` arguments, `--username` and `--password` with your account credentials.
 
 *Disclaimer:* Yahoo! is requiring a captcha from me, just to log in, so this isn't currently working as it ought to.
-For the time being, simply run the script, use the url it generates (put it in the browser and follow the instructions, then copy the verifier bit in the querystring. Re-run `autoauth.js` with `--reqtoken` and `--reqsecret` set to the output from the previous run of `autoauth.js`, and `--verifier` to that bit from the URL.
+For the time being, simply run the script, use the url it generates (put it in the browser and follow the instructions, then copy the verifier bit in the querystring. Re-run `auth.js` with `--reqtoken` and `--reqsecret` set to the output from the previous run of `auth.js`, and `--verifier` to that bit from the URL.
 
 If you know how to get around that captcha issue, let me know. It's probably some JS trigger that I'm missing in the verifier script. Damn you web 2.0.
 
 ### Developing other providers
 
 Each new service requires a new phantomjs module in `verifiers/` and some
-additions to the clients hash in autoauth.js.
+additions to the clients hash in `auth.js`.
 
 ## Running the auth.js script:
 
@@ -99,6 +99,10 @@ autoauth.twitter(key, secret).fullLogin(user, password,
     console.log("Got the user's credentials!", access_token, access_token_secret);
 });
 ````
+
+### Note
+
+* `auth.py` is obsolete.
 
 # License
 
