@@ -18,6 +18,7 @@
     "url": "http://henrian.com"
   },
   "main": "auth.js",
+  "license": "MIT",
   "dependencies": {
     "optimist": "*",
     "winston": "*",

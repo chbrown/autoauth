@@ -100,10 +100,6 @@ autoauth.twitter(key, secret).fullLogin(user, password,
 });
 ````
 
-### Note
+## License
 
-* `auth.py` is obsolete.
-
-# License
-
-Copyright 2012 Christopher Brown, [MIT Licensed](http://gifl.me/MIT License)
+Copyright © 2012–2013 Christopher Brown. [MIT Licensed](LICENSE).
