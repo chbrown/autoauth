@@ -12,11 +12,7 @@
     "type": "git",
     "url": "http://github.com/chbrown/autoauth.git"
   },
-  "author": {
-    "name": "Christopher Brown",
-    "email": "io@henrian.com",
-    "url": "http://henrian.com"
-  },
+  "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
   "main": "auth.js",
   "license": "MIT",
   "dependencies": {
