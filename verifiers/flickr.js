@@ -15,6 +15,10 @@ page.onLoadFinished = function(status) {
   // console.log('Rendering: ' + EXPECT + '-' + Date.now() + '.png');
   // page.render(EXPECT + '-' + Date.now() + '.png');
 
+  if (page.content.match(/window.location.replace/)) {
+    return;
+  }
+
   if (EXPECT === 'login') {
     EXPECT = 'authorize';
 

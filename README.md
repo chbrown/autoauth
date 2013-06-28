@@ -78,7 +78,7 @@ You'll run the `auth.js` script, replacing your username and password with actua
 ````bash
 node auth.js --provider twitter \
   --appkey xkNtpnwJdmbSE6uDH0vsF --appsecret hqgCs6kzXfaHT5pS8GdyEo93V04QMUI7u2JtxcZKB1N \
-  --user thisisnotme --password r5Q4cERliu
+  --username thisisnotme --password r5Q4cERliu
 ````
 
 This is just the command line interface. You can also use the Node.js lib as a module!
@@ -92,11 +92,11 @@ var user = 'thisisnotme';
 var password = 'r5Q4cERliu';
 
 autoauth.twitter(key, secret).fullLogin(user, password,
-  function(err, access_token, access_token_secret) {
+  function(err, credentials) {
   if (err)
     console.log("WTF!", err);
   else
-    console.log("Got the user's credentials!", access_token, access_token_secret);
+    console.log("Got the user's credentials!", credentials.access_token, credentials.access_token_secret);
 });
 ````
 
