@@ -1,8 +1,13 @@
 {
   "name": "autoauth",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "OAuth credential helper (supports Twitter and Flickr).",
-  "keywords": ["oauth", "luddite", "automatic", "phantomjs"],
+  "keywords": [
+    "oauth",
+    "luddite",
+    "automatic",
+    "phantomjs"
+  ],
   "homepage": "http://github.com/chbrown/autoauth",
   "bugs": {
     "url": "http://github.com/chbrown/autoauth/issues",
