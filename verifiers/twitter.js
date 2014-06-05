@@ -1,5 +1,5 @@
 #!/usr/bin/env phantomjs
-'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
+/*jslint node: true, browser: true */ /*globals phantom, $ */
 var system = require('system');
 var webpage = require('webpage');
 var url = system.args[1];

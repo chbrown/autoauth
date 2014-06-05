@@ -21,8 +21,8 @@
   "main": "auth.js",
   "license": "MIT",
   "dependencies": {
+    "loge": "*",
     "optimist": "*",
-    "winston": "*",
     "oauth": "*"
   }
 }

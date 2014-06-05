@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
-var winston = require('winston');
+/*jslint node: true */
+var logger = require('loge');
 var path = require('path');
 var util = require('util');
 var oauth = require('oauth');
@@ -11,10 +11,10 @@ function verify(verifier_js, url, username, password, callback) {
   // callback signature (err, request_token, request_token_secret, verifier)
   var phantom_args = [verifier_js, url, username, password];
   var phantom_opts = {cwd: verifiers_path, timeout: 15*1000}; // 15sec timeout
-  winston.info('$ cd ' + verifiers_path);
-  winston.info('$ phantomjs ' + phantom_args.join(' '));
+  logger.info('$ cd ' + verifiers_path);
+  logger.info('$ phantomjs ' + phantom_args.join(' '));
   child_process.execFile('phantomjs', phantom_args, phantom_opts, function(err, stdout, stderr) {
-    if (stderr) winston.error('phantomjs stderr: ' + stderr);
+    if (stderr) logger.error('phantomjs stderr: ' + stderr);
     if (err) return callback(err);
     callback(null, stdout.trim());
   });
@@ -32,11 +32,11 @@ Client.prototype.getAccessToken = function(request_token, request_token_secret, 
     }
     else {
       if (err) {
-        winston.error("Auto OAuth authentication process failed");
-        winston.error(util.inspect(err, {showHidden: true, depth: 7}));
+        logger.error("Auto OAuth authentication process failed");
+        logger.error(util.inspect(err, {showHidden: true, depth: 7}));
       }
       else {
-        winston.info('access_token=' + access_token + ',access_token_secret=' + access_token_secret);
+        logger.info('access_token=' + access_token + ',access_token_secret=' + access_token_secret);
       }
     }
   });
@@ -44,14 +44,14 @@ Client.prototype.getAccessToken = function(request_token, request_token_secret, 
 Client.prototype.fullLogin = function(username, password, callback) {
   var self = this;
   this.OAuth.getOAuthRequestToken(function(err, oauth_request_token, oauth_request_token_secret) {
-    winston.info('request_token=' + oauth_request_token + ',request_token_secret=' + oauth_request_token_secret);
+    logger.info('request_token=' + oauth_request_token + ',request_token_secret=' + oauth_request_token_secret);
     var url = self.login_url + oauth_request_token;
     // oauth_request_token, oauth_request_token_secret,
     verify(self.verifier_js, url, username, password, function(err, verifier) {
       if (callback && err)
         return callback(err);
       if (!callback)
-        winston.info('Got verifier: ' + verifier);
+        logger.info('Got verifier: ' + verifier);
       self.getAccessToken(oauth_request_token, oauth_request_token_secret, verifier, callback);
     });
   });

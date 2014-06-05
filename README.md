@@ -36,7 +36,7 @@ On Mac OS X:
 brew install phantomjs
 ````
 
-2. `oauth` and `optimist` and `winston`
+2. `oauth` and `optimist` and `loge`
 
 ````bash
 npm install
