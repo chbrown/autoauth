@@ -15,7 +15,7 @@ page.onLoadFinished = function(status) {
   // console.log('Expect: ' + EXPECT + ', Status: ' + status);
   if (EXPECT === 'login') {
     page.includeJs(jquery_url, function() {
-      EXPECT = 'done';
+      EXPECT = 'allow';
 
       page.evaluate(function(opts) {
         $('input[name="session[username_or_email]"]:visible:first').val(opts.screenname).trigger('keydown');
@@ -25,6 +25,15 @@ page.onLoadFinished = function(status) {
           $form.trigger('submit');
         }, Math.random() * 250 + 250);
       }, {screenname: screenname, password: password});
+    });
+  }
+  else if (EXPECT === 'allow') {
+    page.includeJs(jquery_url, function() {
+      EXPECT = 'done';
+
+      page.evaluate(function() {
+        $('#allow').trigger('click');
+      });
     });
   }
   else if (EXPECT === 'done') {
