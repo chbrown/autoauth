@@ -7,9 +7,9 @@ var oauth = require('oauth');
 var child_process = require('child_process');
 
 var verifiers_path = path.join(__dirname, 'verifiers');
-function verify(verifier_js, url, username, password, callback) {
+function verify(verifier_js, url, username, password, email, callback) {
   // callback signature (err, request_token, request_token_secret, verifier)
-  var phantom_args = [verifier_js, url, username, password];
+  var phantom_args = [verifier_js, url, username, password, email];
   var phantom_opts = {cwd: verifiers_path, timeout: 15*1000}; // 15sec timeout
   logger.info('$ cd ' + verifiers_path);
   logger.info('$ phantomjs ' + phantom_args.join(' '));
@@ -41,13 +41,13 @@ Client.prototype.getAccessToken = function(request_token, request_token_secret, 
     }
   });
 };
-Client.prototype.fullLogin = function(username, password, callback) {
+Client.prototype.fullLogin = function(username, password, email, callback) {
   var self = this;
   this.OAuth.getOAuthRequestToken(function(err, oauth_request_token, oauth_request_token_secret) {
     logger.info('request_token=' + oauth_request_token + ',request_token_secret=' + oauth_request_token_secret);
     var url = self.login_url + oauth_request_token;
     // oauth_request_token, oauth_request_token_secret,
-    verify(self.verifier_js, url, username, password, function(err, verifier) {
+    verify(self.verifier_js, url, username, password, email, function(err, verifier) {
       if (callback && err)
         return callback(err);
       if (!callback)
@@ -77,7 +77,7 @@ if (require.main === module) {
   var argv = require('optimist')
     .usage('Convert login creds to OAuth creds!\n' +
       'Usage: $0 --appkey APP_KEY --appsecret APP_SECRET \\\n' +
-      '  --username USERNAME --password PASSWORD\n' +
+      '  --username USERNAME --password PASSWORD --email EMAIL\n' +
       'Or: $0 --appkey APP_KEY --appsecret APP_SECRET \\\n' +
       '  --reqtoken OAUTH_REQUEST_TOKEN --reqsecret OAUTH_REQUEST_TOKEN_SECRET --verifier PIN')
     .demand(['appkey', 'appsecret', 'provider'])
@@ -89,7 +89,7 @@ if (require.main === module) {
     client.getAccessToken(argv.reqtoken, argv.reqsecret, argv.verifier);
   }
   else {
-    client.fullLogin(argv.username, argv.password);
+    client.fullLogin(argv.username, argv.password, argv.email);
   }
 }
 
