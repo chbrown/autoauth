@@ -11,10 +11,11 @@ function verify(verifier_js, url, username, password, callback) {
   // callback signature (err, request_token, request_token_secret, verifier)
   var phantom_args = [verifier_js, url, username, password];
   var phantom_opts = {cwd: verifiers_path, timeout: 15*1000}; // 15sec timeout
-  logger.info('$ cd ' + verifiers_path);
-  logger.info('$ phantomjs ' + phantom_args.join(' '));
+  logger.info('$ cd %s', verifiers_path);
+  logger.info('$ phantomjs %s', phantom_args.join(' '));
   child_process.execFile('phantomjs', phantom_args, phantom_opts, function(err, stdout, stderr) {
-    if (stderr) logger.error('phantomjs stderr: ' + stderr);
+    if (stderr) logger.error('phantomjs stderr: %s', stderr);
+    if (stdout) logger.info('phantomjs stdout: %s', stdout);
     if (err) return callback(err);
     callback(null, stdout.trim());
   });
@@ -48,10 +49,12 @@ Client.prototype.fullLogin = function(username, password, callback) {
     var url = self.login_url + oauth_request_token;
     // oauth_request_token, oauth_request_token_secret,
     verify(self.verifier_js, url, username, password, function(err, verifier) {
-      if (callback && err)
+      if (callback && err) {
         return callback(err);
-      if (!callback)
+      }
+      if (!callback) {
         logger.info('Got verifier: ' + verifier);
+      }
       self.getAccessToken(oauth_request_token, oauth_request_token_secret, verifier, callback);
     });
   });
