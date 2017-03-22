@@ -1,74 +1,63 @@
 #!/usr/bin/env node
-/*jslint node: true */
-var logger = require('loge');
-var path = require('path');
-var util = require('util');
-var oauth = require('oauth');
-var child_process = require('child_process');
+const path = require('path');
+const oauth = require('oauth');
+const child_process = require('child_process');
 
-var verifiers_path = path.join(__dirname, 'verifiers');
-function verify(verifier_js, url, username, password, callback) {
-  // callback signature (err, request_token, request_token_secret, verifier)
-  var phantom_args = [verifier_js, url, username, password];
-  var phantom_opts = {cwd: verifiers_path, timeout: 15*1000}; // 15sec timeout
-  logger.info('$ cd %s', verifiers_path);
-  logger.info('$ phantomjs %s', phantom_args.join(' '));
-  child_process.execFile('phantomjs', phantom_args, phantom_opts, function(err, stdout, stderr) {
-    if (stderr) logger.error('phantomjs stderr: %s', stderr);
-    if (stdout) logger.info('phantomjs stdout: %s', stdout);
-    if (err) return callback(err);
-    callback(null, stdout.trim());
-  });
-}
-
-function Client(request_token_url, access_token_url, login_url, verifier_js, key, secret) {
-  this.OAuth = new oauth.OAuth(request_token_url, access_token_url, key, secret, '1.0A', null, 'HMAC-SHA1');
-  this.login_url = login_url;
-  this.verifier_js = verifier_js;
-}
-Client.prototype.getAccessToken = function(request_token, request_token_secret, verifier, callback) {
-  this.OAuth.getOAuthAccessToken(request_token, request_token_secret, verifier, function(err, access_token, access_token_secret) {
-    if (callback) {
-      callback(err, {access_token: access_token, access_token_secret: access_token_secret});
-    }
-    else {
-      if (err) {
-        logger.error("Auto OAuth authentication process failed");
-        logger.error(util.inspect(err, {showHidden: true, depth: 7}));
-      }
-      else {
-        logger.info('access_token=' + access_token + ',access_token_secret=' + access_token_secret);
-      }
-    }
-  });
-};
-Client.prototype.fullLogin = function(username, password, callback) {
-  var self = this;
-  this.OAuth.getOAuthRequestToken(function(err, oauth_request_token, oauth_request_token_secret) {
-    logger.info('request_token=' + oauth_request_token + ',request_token_secret=' + oauth_request_token_secret);
-    var url = self.login_url + oauth_request_token;
-    // oauth_request_token, oauth_request_token_secret,
-    verify(self.verifier_js, url, username, password, function(err, verifier) {
-      if (callback && err) {
-        return callback(err);
-      }
-      if (!callback) {
-        logger.info('Got verifier: ' + verifier);
-      }
-      self.getAccessToken(oauth_request_token, oauth_request_token_secret, verifier, callback);
+class Client {
+  constructor(request_token_url, access_token_url, login_url, verifier_js, key, secret) {
+    this.OAuth = new oauth.OAuth(request_token_url, access_token_url, key, secret, '1.0A', null, 'HMAC-SHA1');
+    this.login_url = login_url;
+    this.verifier_js = verifier_js;
+  }
+  getRequestToken(callback) {
+    this.OAuth.getOAuthRequestToken((err, oauth_request_token, oauth_request_token_secret) => {
+      const url = this.login_url + oauth_request_token;
+      console.info(`getRequestToken: oauth_request_token=${oauth_request_token},oauth_request_token_secret=${oauth_request_token_secret}`);
+      return callback(err, {url, oauth_request_token, oauth_request_token_secret});
     });
-  });
-};
+  }
+  verify(url, username, password, callback) {
+    const cwd = path.join(__dirname, 'verifiers');
+    const phantom_args = [this.verifier_js, url, username, password];
+    const phantom_opts = {cwd, timeout: 15*1000}; // 15sec timeout
+    console.info(`$ cd ${cwd}`);
+    console.info(`$ phantomjs ${phantom_args.join(' ')}`);
+    child_process.execFile('phantomjs', phantom_args, phantom_opts, (err, stdout, stderr) => {
+      if (stderr) console.error(`phantomjs stderr: ${stderr}`);
+      if (stdout) console.info(`phantomjs stdout: ${stdout}`);
+      if (err) return callback(err);
+      callback(null, stdout.trim());
+    });
+  }
+  getAccessToken(request_token, request_token_secret, verifier, callback) {
+    this.OAuth.getOAuthAccessToken(request_token, request_token_secret, verifier, (err, access_token, access_token_secret) => {
+      console.info(`getAccessToken: access_token=${access_token},access_token_secret=${access_token_secret}`);
+      callback(err, {access_token, access_token_secret});
+    });
+  }
+  fullLogin(username, password, callback) {
+    this.getRequestToken((err, {url, oauth_request_token, oauth_request_token_secret}) => {
+      if (err) return callback(err);
+      this.verify(url, username, password, (err, verifier) => {
+        if (err) return callback(err);
+        console.info(`fullLogin: verifier=${verifier}`);
+        this.getAccessToken(oauth_request_token, oauth_request_token_secret, verifier, callback);
+      });
+    });
+  }
+}
 
-var clients = {
-  twitter: function(key, secret) {
-    return new Client('https://twitter.com/oauth/request_token',
-      'https://twitter.com/oauth/access_token',
-      'https://twitter.com/oauth/authorize?oauth_token=',
+const clients = {
+  twitter(key, secret) {
+    return new Client(
+      'https://api.twitter.com/oauth/request_token?oauth_callback=oob',
+      'https://api.twitter.com/oauth/access_token',
+      'https://api.twitter.com/oauth/authorize?oauth_token=',
       'twitter.js', key, secret);
   },
-  flickr: function(key, secret) {
-    return new Client('http://www.flickr.com/services/oauth/request_token',
+  flickr(key, secret) {
+    return new Client(
+      'http://www.flickr.com/services/oauth/request_token',
       'http://www.flickr.com/services/oauth/access_token',
       // We could probably have perms=write below, just as well, but "delete" is a fuller permission set.
       'http://www.flickr.com/services/oauth/authorize?perms=delete&oauth_token=',
@@ -76,24 +65,45 @@ var clients = {
   },
 };
 
-if (require.main === module) {
-  var argv = require('optimist')
-    .usage('Convert login creds to OAuth creds!\n' +
-      'Usage: $0 --appkey APP_KEY --appsecret APP_SECRET \\\n' +
-      '  --username USERNAME --password PASSWORD\n' +
-      'Or: $0 --appkey APP_KEY --appsecret APP_SECRET \\\n' +
-      '  --reqtoken OAUTH_REQUEST_TOKEN --reqsecret OAUTH_REQUEST_TOKEN_SECRET --verifier PIN')
+function jsonCallback(err, obj) {
+  if (err) {
+    console.error(`autoauth: ${err.toString()}`);
+  }
+  else {
+    console.log(JSON.stringify(obj));
+  }
+}
+
+function main() {
+  const usage = `
+Convert login creds to OAuth creds!
+
+Usage: node auth.js --appkey APP_KEY --appsecret APP_SECRET \\
+          --username USERNAME --password PASSWORD
+       node auth.js --appkey APP_KEY --appsecret APP_SECRET \\
+          --reqtoken OAUTH_REQUEST_TOKEN --reqsecret OAUTH_REQUEST_TOKEN_SECRET --verifier PIN
+`;
+  const argv = require('optimist')
+    .usage(usage)
     .demand(['appkey', 'appsecret', 'provider'])
     .argv;
 
-  var client = clients[argv.provider](argv.appkey, argv.appsecret);
+  const client = clients[argv.provider](argv.appkey, argv.appsecret);
   if (argv.verifier) {
     // request_token, request_token_secret, and verifier are supplied
-    client.getAccessToken(argv.reqtoken, argv.reqsecret, argv.verifier);
+    client.getAccessToken(argv.reqtoken, argv.reqsecret, argv.verifier, jsonCallback);
+  }
+  else if (argv.username && argv.password) {
+    client.fullLogin(argv.username, argv.password, jsonCallback);
   }
   else {
-    client.fullLogin(argv.username, argv.password);
+    // request token url only
+    client.getRequestToken(jsonCallback);
   }
+}
+
+if (require.main === module) {
+  main();
 }
 
 module.exports = clients;
