@@ -8,18 +8,18 @@
     "automatic",
     "phantomjs"
   ],
-  "homepage": "http://github.com/chbrown/autoauth",
+  "homepage": "https://github.com/chbrown/autoauth",
   "bugs": {
-    "url": "http://github.com/chbrown/autoauth/issues",
+    "url": "https://github.com/chbrown/autoauth/issues",
     "email": "Christopher Brown <io@henrian.com>"
   },
   "repository": {
     "type": "git",
-    "url": "http://github.com/chbrown/autoauth.git"
+    "url": "https://github.com/chbrown/autoauth.git"
   },
   "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
-  "main": "auth.js",
   "license": "MIT",
+  "main": "auth.js",
   "dependencies": {
     "optimist": "*",
     "oauth": "*"
