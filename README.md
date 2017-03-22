@@ -26,6 +26,7 @@ To recap, the goal is (usually) to end up with four credentials:
 * Access token
 * Access token secret
 
+
 ## Prerequisites for all endpoints:
 
 1. [PhantomJS](https://github.com/ariya/phantomjs/)!
@@ -51,6 +52,7 @@ npm install
 
 Your personal Twitter account will have a pre-formed access token and secret at the bottom of the page, but I take it you're going to be authenticating multiple accounts programmatically. Otherwise, those should work just fine (and you don't need this `AutoAuth` script at all).
 
+
 # Flickr
 
 1. Go to http://www.flickr.com/services/apps/create/apply/ (also linked from http://www.flickr.com/services/apps/)
@@ -66,40 +68,42 @@ For the time being, simply run the script, use the url it generates (put it in t
 
 If you know how to get around that captcha issue, let me know. It's probably some JS trigger that I'm missing in the verifier script. Damn you web 2.0.
 
+
 ### Developing other providers
 
 Each new service requires a new phantomjs module in `verifiers/` and some
 additions to the clients hash in `auth.js`.
 
+
 ## Running the auth.js script:
 
 You'll run the `auth.js` script, replacing your username and password with actual values:
 
-````bash
+```bash
 node auth.js --provider twitter \
   --appkey xkNtpnwJdmbSE6uDH0vsF --appsecret hqgCs6kzXfaHT5pS8GdyEo93V04QMUI7u2JtxcZKB1N \
   --username thisisnotme --password r5Q4cERliu
-````
+```
 
-This is just the command line interface. You can also use the Node.js lib as a module!
+That is just the command line interface. You can also use the Node.js library as a module!
 
-````javascript
-var autoauth = require('autoauth');
+```javascript
+const autoauth = require('autoauth');
 
-var key = 'xkNtpnwJdmbSE6uDH0vsF';
-var secret = 'hqgCs6kzXfaHT5pS8GdyEo93V04QMUI7u2JtxcZKB1N';
-var user = 'thisisnotme';
-var password = 'r5Q4cERliu';
+const key = 'xkNtpnwJdmbSE6uDH0vsF';
+const secret = 'hqgCs6kzXfaHT5pS8GdyEo93V04QMUI7u2JtxcZKB1N';
+const user = 'thisisnotme';
+const password = 'r5Q4cERliu';
 
-autoauth.twitter(key, secret).fullLogin(user, password,
-  function(err, credentials) {
+autoauth.twitter(key, secret).fullLogin(user, password, (err, credentials) => {
   if (err)
     console.log("WTF!", err);
   else
     console.log("Got the user's credentials!", credentials.access_token, credentials.access_token_secret);
 });
-````
+```
 
 ## License
 
-Copyright © 2012–2013 Christopher Brown. [MIT Licensed](LICENSE).
+Copyright © 2012-2013, 2017 Christopher Brown.
+[MIT Licensed](https://chbrown.github.io/licenses/MIT/#2012-2013,2017).
