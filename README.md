@@ -1,5 +1,7 @@
 # Introduction to OAuth
 
+[![autoauth npm version](https://badge.fury.io/js/autoauth.svg)](https://www.npmjs.com/package/autoauth)
+
 OAuth is a messy process that puts a proxy between your user account and some service.
 It's a many-to-many relationship, usually called an "App," and allows you to set access restrictions between your user account (full access) and what the App can access.
 
